@@ -1,0 +1,44 @@
+server:
+  port: 8181
+
+spring:
+  profiles.active: dev
+  application.name: user
+
+  spring:
+    redis:
+      host: localhost
+      port: 6379
+      password: root
+  ##Mysql
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/user-project
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
+    hikari:
+      connectionTimeout: 30000
+      idleTimeout: 10000
+      maxLifetime: 60000
+      maximumPoolSize: 4
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+---
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: loggers
+  endpoint:
+    loggers:
+      enabled: true
+
+jwt:
+  secret: r5u8x/A?D(G+KbPeSgVkYp3s6v9y$B&E
+  expiration: 100000
