@@ -28,17 +28,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
----
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: loggers
-  endpoint:
-    loggers:
-      enabled: true
-
 jwt:
   secret: r5u8x/A?D(G+KbPeSgVkYp3s6v9y$B&E
   expiration: 100000
