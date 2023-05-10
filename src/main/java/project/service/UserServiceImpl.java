@@ -8,6 +8,7 @@ import project.dto.UserDTO;
 import project.errors.BadRequestException;
 import project.errors.NotFoundException;
 import project.errors.UnauthorizedException;
+
 import project.model.User;
 import project.repository.UserRepository;
 import project.security.IJwtTokenService;
@@ -68,5 +69,8 @@ public class UserServiceImpl implements IUserService{
             }
         });
     }
+
+    // TODO: 09/05/2023 Adicionar Método de validação de cache, ao tentar autenticar a gente pegar o documentNumber, busca no banco 
+    // TODO: 09/05/2023 e verifica se já tem cache, se tiver retorna o token já gerado, se não retorna um novo token 
 
 }
