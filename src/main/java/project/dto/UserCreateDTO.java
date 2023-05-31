@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserCreateDTO {
+public class  UserCreateDTO {
 
     private String documentNumber;
 

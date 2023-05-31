@@ -3,12 +3,10 @@ package project.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import project.dto.Status;
 import project.dto.UserCreateDTO;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 
@@ -23,6 +21,7 @@ public class User {
     @Column(columnDefinition = "BINARY(16)", updatable = false)
     private UUID identifier = UUID.randomUUID();
 
+    @Column(unique = true)
     private String documentNumber;
 
     private String password;
@@ -31,9 +30,15 @@ public class User {
 
     private boolean admin;
 
+    private int attempts;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     public User(UserCreateDTO userCreateDTO, String password) {
         this.setName(userCreateDTO.getName());
         this.setDocumentNumber(userCreateDTO.getDocumentNumber());
         this.setPassword(password);
+        this.setStatus(Status.ACTIVE);
     }
 }

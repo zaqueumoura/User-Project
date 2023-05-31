@@ -12,4 +12,6 @@ public interface IUserService {
     UserAuthenticatedDTO autentication(UserDTO userDTO);
 
     UserCreateResponseDTO getOne(String documentNumber);
+
+    void delete(String documentNumberDelete, String documentNumber);
 }

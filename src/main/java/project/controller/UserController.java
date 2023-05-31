@@ -1,19 +1,13 @@
 package project.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 import project.dto.UserAuthenticatedDTO;
 import project.dto.UserCreateDTO;
 import project.dto.UserCreateResponseDTO;
 import project.dto.UserDTO;
 import project.service.IUserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -42,6 +36,13 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserCreateResponseDTO getOne(@RequestHeader String documentNumber){
         return userService.getOne(documentNumber);
+    }
+
+    @DeleteMapping("/delete/{documentNumberDelete}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable String documentNumberDelete,
+                        @RequestHeader String documentNumber){
+        userService.delete(documentNumberDelete, documentNumber);
     }
 
 }

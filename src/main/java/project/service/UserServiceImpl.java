@@ -1,10 +1,7 @@
 package project.service;
 
 import lombok.RequiredArgsConstructor;
-import project.dto.UserAuthenticatedDTO;
-import project.dto.UserCreateDTO;
-import project.dto.UserCreateResponseDTO;
-import project.dto.UserDTO;
+import project.dto.*;
 import project.errors.BadRequestException;
 import project.errors.NotFoundException;
 import project.errors.UnauthorizedException;
@@ -24,6 +21,8 @@ public class UserServiceImpl implements IUserService{
 
     private final IJwtTokenService jwtTokenService;
 
+    private final ICacheToken cacheToken;
+
     @Override
     public UserCreateResponseDTO create(UserCreateDTO userCreateDTO, String documentNumber){
         validateCreateUser(documentNumber, userCreateDTO.getDocumentNumber());
@@ -36,20 +35,34 @@ public class UserServiceImpl implements IUserService{
         return encoder.encode(password);
     }
 
-    private void descryptoHashPassword(String password, String passwordSave){
+    private void descryptoHashPassword(String password, User user){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, passwordSave)){
+        if (!encoder.matches(password, user.getPassword())){
+            if (user.getAttempts() >= 8){
+                user.setStatus(Status.BLOCKED);
+                cacheToken.save(user);
+                throw new UnauthorizedException("Usuário ou senha incorretos");
+            }
+            user.setAttempts(user.getAttempts() +1);
+            cacheToken.save(user);
             throw new UnauthorizedException("Usuário ou senha incorretos");
         }
-
+        user.setAttempts(0);
+        cacheToken.save(user);
     }
 
     @Override
     public UserAuthenticatedDTO autentication(UserDTO userDTO){
-       var user = userRepository.findByDocumentNumber(userDTO.getDocumentNumber())
-               .orElseThrow(() -> new NotFoundException("Usuário ou senha incorretos"));
-       descryptoHashPassword(userDTO.getPassword(), user.getPassword());
+       //var user = cacheToken.getOne(userDTO.getDocumentNumber());
+        var user = userRepository.findByDocumentNumber(userDTO.getDocumentNumber()).orElseThrow();
+       if (!Status.ACTIVE.equals(user.getStatus())){
+           throw new UnauthorizedException("Usuário inativo ou bloqueado");
+       }
+
+       descryptoHashPassword(userDTO.getPassword(), user);
+
        return jwtTokenService.generateToken(user);
+
     }
 
     @Override
@@ -57,6 +70,18 @@ public class UserServiceImpl implements IUserService{
         return new UserCreateResponseDTO(userRepository.findByDocumentNumber(documentNumber).orElseThrow(
                 ()-> new NotFoundException("conta não entonctrada")));
 
+    }
+
+    public void delete(String documentNumberDelete, String documentNumber){
+        var userAdmin = userRepository.findByDocumentNumber(documentNumber).orElseThrow(
+                ()-> new NotFoundException("conta não entonctrada"));
+        if (!userAdmin.isAdmin()){
+            throw new BadRequestException("Usuário não tem permissão para essa operação");
+        }
+        var userDelete = userRepository.findByDocumentNumber(documentNumberDelete).orElseThrow(
+                ()-> new NotFoundException("conta não entonctrada"));
+
+        userRepository.delete(userDelete);
     }
 
     private void validateCreateUser(String documentAdmin, String documentNew){
@@ -70,7 +95,5 @@ public class UserServiceImpl implements IUserService{
         });
     }
 
-    // TODO: 09/05/2023 Adicionar Método de validação de cache, ao tentar autenticar a gente pegar o documentNumber, busca no banco 
-    // TODO: 09/05/2023 e verifica se já tem cache, se tiver retorna o token já gerado, se não retorna um novo token 
 
 }

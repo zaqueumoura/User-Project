@@ -20,4 +20,9 @@ public class UserAuthenticatedDTO {
     private int expirationTime;
 
 
+    public UserAuthenticatedDTO(TokenCacheDTO token) {
+        this.setToken(token.getToken());
+        this.setName(token.getName());
+
+    }
 }
